@@ -1,7 +1,5 @@
 package me.keyboi.bushrehab;
 
-import me.keyboi.bushrehab.listener.BushGrowingListener;
-import me.keyboi.bushrehab.listener.PlayerUseBonemealListener;
 import me.keyboi.bushrehab.listener.PlayerUseWaterPotionListener;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -29,7 +27,7 @@ public final class BushRehab extends JavaPlugin implements Listener {
     public void onEnable() {
         Bukkit.getConsoleSender().sendMessage("_/\\_ BushRehab opening up shop _/\\_");
         getServer().getPluginManager().registerEvents(new PlayerUseWaterPotionListener(), this);
- 
+    }
         @Override
         public void onDisable () {
             Bukkit.getConsoleSender().sendMessage("_/\\_ BushRehab closing up shop _/\\_");

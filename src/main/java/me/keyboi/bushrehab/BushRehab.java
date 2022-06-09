@@ -15,21 +15,40 @@ import org.bukkit.inventory.meta.PotionMeta;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.plugin.Plugin;
+import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.potion.PotionData;
 import org.bukkit.potion.PotionType;
 
 
 public final class BushRehab extends JavaPlugin implements Listener {
-   // private NamespacedKey bushStateKey;
+
+    public final Keys keys;
+
+    public BushRehab() {
+        keys = new Keys(this);
+    }
 
     @Override
     public void onEnable() {
         Bukkit.getConsoleSender().sendMessage("_/\\_ BushRehab opening up shop _/\\_");
-        getServer().getPluginManager().registerEvents(new PlayerUseWaterPotionListener(), this);
+
+        registerEvents();
+
     }
-        @Override
-        public void onDisable () {
-            Bukkit.getConsoleSender().sendMessage("_/\\_ BushRehab closing up shop _/\\_");
-        }
+
+    @Override
+    public void onDisable () {
+
+        Bukkit.getConsoleSender().sendMessage("_/\\_ BushRehab closing up shop _/\\_");
+
+    }
+
+    private void registerEvents() {
+        PluginManager pm = getServer().getPluginManager();
+
+        pm.registerEvents(new PlayerUseWaterPotionListener(this), this);
+
+    }
+
 }

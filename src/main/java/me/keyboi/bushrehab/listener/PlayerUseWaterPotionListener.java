@@ -10,6 +10,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
+import org.bukkit.event.block.BlockEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerItemConsumeEvent;
 import org.bukkit.inventory.ItemStack;
@@ -19,11 +20,19 @@ import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.potion.PotionType;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import static org.bukkit.Bukkit.getServer;
 
 public class PlayerUseWaterPotionListener implements Listener {
 
-    private static final Plugin plugin = BushRehab.getPlugin(BushRehab.class);
+    BushRehab main;
+    Map<Location, Integer> blockState = new HashMap<Location, Integer>();
+    NamespacedKey bushStateKey = new NamespacedKey(main, "bushstate");
+    public PlayerUseWaterPotionListener(BushRehab main) {
+        this.main = main;
+    }
     @EventHandler
     public void onPlayerDrinkWater(PlayerItemConsumeEvent e){
         Player p = e.getPlayer();
@@ -33,52 +42,37 @@ public class PlayerUseWaterPotionListener implements Listener {
         }
     }
 
+
     @EventHandler
     public void onPlayerInteract(PlayerInteractEvent event) {
-        Player player = event.getPlayer();
+
+        if (event.getAction() != Action.RIGHT_CLICK_BLOCK) {return;}
+
         Block clickedBlock = event.getClickedBlock();
-        NamespacedKey bushStateKey = new NamespacedKey(plugin, "bushstate");
-        PersistentDataContainer customBlockData = new CustomBlockData(clickedBlock, plugin);
-        String blockX = Double.toString(clickedBlock.getX());
-        String blockY = Double.toString(clickedBlock.getY());
-        String blockZ = Double.toString(clickedBlock.getZ());
+        if (clickedBlock == null || clickedBlock.getType() != Material.POTTED_DEAD_BUSH) {return;}
+
+        Location blocklocation = clickedBlock.getLocation();
+        Player player = event.getPlayer();
+        if (player.getInventory().getItemInMainHand().getType() != Material.POTION) {return;}
+
+        PotionMeta potionMeta = (PotionMeta) player.getInventory().getItemInMainHand().getItemMeta();
+        if (potionMeta.getBasePotionData().getType() != PotionType.WATER) {return;}
+
+        event.setCancelled(true);
+
+        PersistentDataContainer customBlockData = new CustomBlockData(clickedBlock, main);
+                            player.sendMessage("clicking bush at " + blocklocation.getX() + " " + blocklocation.getY()+ " " + blocklocation.getZ() + " with water");
 
 
-        if (event.getAction() == Action.RIGHT_CLICK_BLOCK) {
-            if(clickedBlock == null || player.getInventory().getItemInMainHand().getType() == Material.AIR){
-                return;
-            }
+        if (!customBlockData.has(main.keys.bushStateKey, PersistentDataType.INTEGER))
+            customBlockData.set(main.keys.bushStateKey, PersistentDataType.INTEGER, 1);
 
-            if (clickedBlock.getType() == Material.POTTED_DEAD_BUSH) {
-                Material item = player.getInventory().getItemInMainHand().getType();
-
-                if (item == Material.POTION) {
-                    PotionMeta meta = (PotionMeta) player.getInventory().getItemInMainHand().getItemMeta();
-
-                    if (meta != null) {
-                        PotionType potiontype = meta.getBasePotionData().getType();
-
-                        if (clickedBlock.getType() == Material.POTTED_DEAD_BUSH && potiontype == PotionType.WATER) {
-                            event.setCancelled(true);
-                            player.sendMessage("clicking bush at " + blockX + " " + blockY + " " + blockZ + " with water");
-
-                            if (customBlockData.get(bushStateKey,PersistentDataType.INTEGER) == null) {
-                                customBlockData.set(bushStateKey, PersistentDataType.INTEGER, 1);
-
-                                player.sendMessage("bush at "+ blockX + " " + blockY + " " + blockZ +" is set to 1");
-
-                            } else {
-                                player.sendMessage("bush at "+ blockX + " " + blockY + " " + blockZ +" holds value of: " + customBlockData.get(bushStateKey,PersistentDataType.INTEGER));
-                            }
+        player.sendMessage("bush at "+ blocklocation.getX() + " " + blocklocation.getY() + " " + blocklocation.getZ() +" holds value of: " + customBlockData.get(main.keys.bushStateKey,PersistentDataType.INTEGER));
                             emptyWaterbottle(player);
                             player.getPlayer();
 
-                        }
-                    }
-                }
-            }
-        }
     }
+
  /*  @EventHandler
    public void onClickPottedDeadBush(InventoryInteractEvent event){
        Block clickedBlock = event.getWhoClicked().getTargetBlock(null,4);

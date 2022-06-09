@@ -16,29 +16,29 @@ import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.potion.PotionData;
 import org.bukkit.potion.PotionType;
+import org.bukkit.scheduler.BukkitRunnable;
+import org.bukkit.scheduler.BukkitScheduler;
+import org.bukkit.scheduler.BukkitTask;
 
 
 public final class BushRehab extends JavaPlugin implements Listener {
 
     public final Keys keys;
-    private Player player;
 
     public BushRehab() {
         keys = new Keys(this);
     }
-
     @Override
     public void onEnable() {
         Bukkit.getConsoleSender().sendMessage("_/\\_ BushRehab opening up shop _/\\_");
-
         registerEvents();
-        caster(player);
+        BukkitTask task = new ChangeBushData(this).runTaskTimer(this,0,0);
 
     }
 
+
     @Override
     public void onDisable () {
-
         Bukkit.getConsoleSender().sendMessage("_/\\_ BushRehab closing up shop _/\\_");
 
     }
@@ -49,16 +49,4 @@ public final class BushRehab extends JavaPlugin implements Listener {
         pm.registerEvents(new PlayerUseWaterPotionListener(this), this);
 
     }
-    public void caster(Player caster) {
-        if (caster.getTargetBlock(null, 4).getType() == Material.POTTED_DEAD_BUSH) {
-            Location targetLoc = caster.getTargetBlock(null, 4).getLocation();
-            Block targetBlock = targetLoc.getBlock();
-            PersistentDataContainer customExistBlockData = new CustomBlockData(targetBlock, this);
-
-            if (customExistBlockData.get(this.keys.bushStateKey,PersistentDataType.INTEGER) == null) {
-                customExistBlockData.set(this.keys.bushStateKey, PersistentDataType.INTEGER, 0);
-            }
-        }
-    }
-
 }

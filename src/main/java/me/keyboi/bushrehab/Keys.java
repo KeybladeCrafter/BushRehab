@@ -7,7 +7,7 @@ public class Keys {
     public NamespacedKey bushStateKey;
 
     public Keys(BushRehab main) {
-        bushStateKey = new NamespacedKey(main, "bush_state");
+        bushStateKey = new NamespacedKey(main, "bushstate");
     }
 
 }

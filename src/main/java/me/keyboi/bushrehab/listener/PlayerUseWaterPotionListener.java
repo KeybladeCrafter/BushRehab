@@ -1,10 +1,8 @@
 package me.keyboi.bushrehab.listener;
 
+import com.jeff_media.customblockdata.CustomBlockData;
 import me.keyboi.bushrehab.BushRehab;
-import me.keyboi.bushrehab.CustomBlockData;
-import org.bukkit.Location;
 import org.bukkit.Material;
-import org.bukkit.NamespacedKey;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -16,14 +14,16 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.PotionMeta;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
-import org.bukkit.plugin.Plugin;
 import org.bukkit.potion.PotionType;
-
-import static org.bukkit.Bukkit.getServer;
 
 public class PlayerUseWaterPotionListener implements Listener {
 
-    private static final Plugin plugin = BushRehab.getPlugin(BushRehab.class);
+    BushRehab main;
+
+    public PlayerUseWaterPotionListener(BushRehab main) {
+        this.main = main;
+    }
+
     @EventHandler
     public void onPlayerDrinkWater(PlayerItemConsumeEvent e){
         Player p = e.getPlayer();
@@ -35,50 +35,36 @@ public class PlayerUseWaterPotionListener implements Listener {
 
     @EventHandler
     public void onPlayerInteract(PlayerInteractEvent event) {
-        Player player = event.getPlayer();
+        if (event.getAction() != Action.RIGHT_CLICK_BLOCK) return;
+
         Block clickedBlock = event.getClickedBlock();
-        NamespacedKey bushStateKey = new NamespacedKey(plugin, "bushstate");
-        PersistentDataContainer customBlockData = new CustomBlockData(clickedBlock, plugin);
-        String blockX = Double.toString(clickedBlock.getX());
-        String blockY = Double.toString(clickedBlock.getY());
-        String blockZ = Double.toString(clickedBlock.getZ());
+        if (clickedBlock == null || clickedBlock.getType() != Material.POTTED_DEAD_BUSH) return;
 
+        Player player = event.getPlayer();
+        if (player.getInventory().getItemInMainHand().getType() != Material.POTION) return;
 
-        if (event.getAction() == Action.RIGHT_CLICK_BLOCK) {
-            if(clickedBlock == null || player.getInventory().getItemInMainHand().getType() == Material.AIR){
-                return;
-            }
+        PotionMeta potionMeta = (PotionMeta) player.getInventory().getItemInMainHand().getItemMeta();
+        if (potionMeta.getBasePotionData().getType() != PotionType.WATER) return;
 
-            if (clickedBlock.getType() == Material.POTTED_DEAD_BUSH) {
-                Material item = player.getInventory().getItemInMainHand().getType();
+        event.setCancelled(true);
 
-                if (item == Material.POTION) {
-                    PotionMeta meta = (PotionMeta) player.getInventory().getItemInMainHand().getItemMeta();
+        PersistentDataContainer customBlockData = new CustomBlockData(clickedBlock, main);
 
-                    if (meta != null) {
-                        PotionType potiontype = meta.getBasePotionData().getType();
+        String blockX = Double.toString(clickedBlock.getX()),
+                blockY = Double.toString(clickedBlock.getY()),
+                blockZ = Double.toString(clickedBlock.getZ());
 
-                        if (clickedBlock.getType() == Material.POTTED_DEAD_BUSH && potiontype == PotionType.WATER) {
-                            event.setCancelled(true);
-                            player.sendMessage("clicking bush at " + blockX + " " + blockY + " " + blockZ + " with water");
+        player.sendMessage("clicking bush at " + blockX + " " + blockY + " " + blockZ + " with water");
 
-                            if (customBlockData.get(bushStateKey,PersistentDataType.INTEGER) == null) {
-                                customBlockData.set(bushStateKey, PersistentDataType.INTEGER, 1);
+        if (!customBlockData.has(main.keys.bushStateKey, PersistentDataType.INTEGER))
+            customBlockData.set(main.keys.bushStateKey, PersistentDataType.INTEGER, 1);
 
-                                player.sendMessage("bush at "+ blockX + " " + blockY + " " + blockZ +" is set to 1");
+        player.sendMessage("bush at "+ blockX + " " + blockY + " " + blockZ +" holds value of: " + customBlockData.get(main.keys.bushStateKey,PersistentDataType.INTEGER));
 
-                            } else {
-                                player.sendMessage("bush at "+ blockX + " " + blockY + " " + blockZ +" holds value of: " + customBlockData.get(bushStateKey,PersistentDataType.INTEGER));
-                            }
-                            emptyWaterbottle(player);
-                            player.getPlayer();
+        emptyWaterbottle(player);
 
-                        }
-                    }
-                }
-            }
-        }
     }
+
  /*  @EventHandler
    public void onClickPottedDeadBush(InventoryInteractEvent event){
        Block clickedBlock = event.getWhoClicked().getTargetBlock(null,4);
@@ -92,16 +78,15 @@ public class PlayerUseWaterPotionListener implements Listener {
    }*/
 
    public void emptyWaterbottle(Player player){
-        if(player.getInventory().getItemInMainHand().getType()==Material.POTION) {
-            PotionMeta meta = (PotionMeta) player.getInventory().getItemInMainHand().getItemMeta();
-            PotionType potiontype = meta.getBasePotionData().getType();
-            Block clickedBlock = player.getTargetBlock(null, 4);
+       if (player.getInventory().getItemInMainHand().getType() != Material.POTION) return;
 
-            if (potiontype == PotionType.WATER && clickedBlock.getType() == Material.POTTED_DEAD_BUSH) {
-                player.getInventory().setItemInMainHand(new ItemStack(Material.GLASS_BOTTLE));
+       PotionMeta meta = (PotionMeta) player.getInventory().getItemInMainHand().getItemMeta();
+       PotionType potiontype = meta.getBasePotionData().getType();
+       Block clickedBlock = player.getTargetBlock(null, 4);
 
-            }
-        }
+       if (potiontype == PotionType.WATER && clickedBlock.getType() == Material.POTTED_DEAD_BUSH)
+           player.getInventory().setItemInMainHand(new ItemStack(Material.GLASS_BOTTLE));
+
    }
         /*if (action == Action.RIGHT_CLICK_BLOCK) {
             Material item = p.getInventory().getItemInMainHand().getType();

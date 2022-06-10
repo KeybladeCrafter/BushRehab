@@ -31,8 +31,6 @@ public class ChangeBushData extends BukkitRunnable {
                 if (customExistBlockData.get(main.keys.bushStateKey, PersistentDataType.INTEGER) == null) {
                     customExistBlockData.set(main.keys.bushStateKey, PersistentDataType.INTEGER, 0);
                     player.sendMessage("block set to 0");
-                } else {
-                    player.sendMessage("block not set to 0");
                 }
             }
         }

@@ -22,14 +22,14 @@ public class ChangeBushData extends BukkitRunnable {
         Collection<? extends Player> players = Bukkit.getOnlinePlayers();
 
         for (Player player : players) {
-            if (player.getTargetBlock(null, 4).getType() == Material.POTTED_DEAD_BUSH) {
+            if (player.getTargetBlock(null, 5).getType() == Material.POTTED_DEAD_BUSH) {
                 Location targetLoc = player.getTargetBlock(null, 4).getLocation();
                 Block targetBlock = targetLoc.getBlock();
                 PersistentDataContainer customExistBlockData = new CustomBlockData(targetBlock, main);
 
                 if (customExistBlockData.get(main.keys.bushStateKey, PersistentDataType.INTEGER) == null) {
                     customExistBlockData.set(main.keys.bushStateKey, PersistentDataType.INTEGER, 0);
-                    player.sendMessage("block set to 0");
+                    player.sendMessage("");
                 }
             }
         }

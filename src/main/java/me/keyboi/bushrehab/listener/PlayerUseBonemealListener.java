@@ -2,6 +2,7 @@ package me.keyboi.bushrehab.listener;
 
 import com.jeff_media.customblockdata.CustomBlockData;
 import me.keyboi.bushrehab.BushRehab;
+import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
@@ -28,43 +29,25 @@ public class PlayerUseBonemealListener implements Listener {
 
             Player player = event.getPlayer();
             Block clickedBlock = event.getClickedBlock();
+            Location blockLocation = clickedBlock.getLocation();
             PersistentDataContainer customBlockData = new CustomBlockData(clickedBlock, main);
+            if(customBlockData.get(main.keys.bushStateKey, PersistentDataType.INTEGER) == null){return;}
             if(customBlockData.get(main.keys.bushStateKey, PersistentDataType.INTEGER) == 2){
-                player.sendMessage("Give this bush some time to rehabilitate, please.");
+                player.sendMessage("[BushRehab]" + ChatColor.GREEN + " Give this bush some time to rehabilitate, please.");
                 return;
             }
             if (clickedBlock != null && clickedBlock.getType() == Material.POTTED_DEAD_BUSH && customBlockData.get(main.keys.bushStateKey, PersistentDataType.INTEGER) != 2) {
-                Location blocklocation = clickedBlock.getLocation();
-
+                
                 if (player.getInventory().getItemInMainHand().getType() == Material.BONE_MEAL) {
-
-                    player.sendMessage("clicking bush at " + blocklocation.getX() + " " + blocklocation.getY() + " " + blocklocation.getZ() + " with bonemeal");
                     event.setCancelled(true);
 
                     if (customBlockData.get(main.keys.bushStateKey, PersistentDataType.INTEGER) == 0) {
                         customBlockData.set(main.keys.bushStateKey, PersistentDataType.INTEGER, 1);
-                        player.sendMessage("bush at " + blocklocation.getX() + " " + blocklocation.getY() + " " + blocklocation.getZ() + " set to " + customBlockData.get(main.keys.bushStateKey, PersistentDataType.INTEGER));
                         removeBonemeal(player);
                     }
                     else {
-                        player.sendMessage("bush at " + blocklocation.getX() + " " + blocklocation.getY() + " " + blocklocation.getZ() + " has already been fertilized. Try giving it some water!");
+                        player.sendMessage("[BushRehab]" + ChatColor.GREEN + " This bush has already been fertilized. Try giving it some water!");
                     }
-
-                    /*if (customBlockData.get(main.keys.bushStateKey, PersistentDataType.INTEGER) == 1) {
-                        customBlockData.set(main.keys.bushStateKey, PersistentDataType.INTEGER, 2);
-                        removeBonemeal(player);
-                        player.sendMessage("bush at " + blocklocation.getX() + " " + blocklocation.getY() + " " + blocklocation.getZ() + " set to " + customBlockData.get(main.keys.bushStateKey, PersistentDataType.INTEGER));
-                        new BukkitRunnable(){
-                            @Override
-                            public void run() {
-                                clickedBlock.setType(item);
-                                player.sendMessage("dead bush at "+ blocklocation.getX() + " " + blocklocation.getY() + " " + blocklocation.getZ() +" has grown!");
-                                customBlockData.remove(main.keys.bushStateKey);
-                            }
-                        }.runTaskLater(main,100);
-                    } else {
-                        player.sendMessage("bush at " + blocklocation.getX() + " " + blocklocation.getY() + " " + blocklocation.getZ() + " holds value of: " + customBlockData.get(main.keys.bushStateKey, PersistentDataType.INTEGER));
-                    }*/
                 }
             }
         }
@@ -79,8 +62,8 @@ public class PlayerUseBonemealListener implements Listener {
                 player.getInventory().getItemInMainHand().setAmount(itemAmount - 1);
             } else {
                 player.getInventory().setItemInMainHand(new ItemStack(Material.AIR));
-                player.sendMessage("Fertilized dead bush. Give it time to absorb nutrients!");
             }
+            player.sendMessage("[BushRehab]" + ChatColor.GREEN + "Fertilized the dead bush. It could use some water!");
         }
     }
 }

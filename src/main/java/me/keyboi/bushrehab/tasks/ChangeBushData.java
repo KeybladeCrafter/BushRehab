@@ -1,6 +1,7 @@
-package me.keyboi.bushrehab;
+package me.keyboi.bushrehab.tasks;
 
 import com.jeff_media.customblockdata.CustomBlockData;
+import me.keyboi.bushrehab.BushRehab;
 import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
@@ -16,8 +17,6 @@ public class ChangeBushData extends BukkitRunnable {
     public ChangeBushData(BushRehab main) {
         this.main = main;
     }
-    //private Keys keys;
-
     @Override
     public void run(){
         Collection<? extends Player> players = Bukkit.getOnlinePlayers();
@@ -35,18 +34,4 @@ public class ChangeBushData extends BukkitRunnable {
             }
         }
     }
-    /* public void changeBushData(Player player, Material material){
-        if (player.getTargetBlock(null, 4).getType() == material) {
-            Location targetLoc = player.getTargetBlock(null, 4).getLocation();
-            Block targetBlock = targetLoc.getBlock();
-            PersistentDataContainer customExistBlockData = new CustomBlockData(targetBlock, main);
-
-            if (customExistBlockData.get(this.keys.bushStateKey, PersistentDataType.INTEGER) == null) {
-                customExistBlockData.set(this.keys.bushStateKey, PersistentDataType.INTEGER, 0);
-                player.sendMessage("block set to 0");
-            } else {
-                player.sendMessage("block not set to 0");
-            }
-        }
-    }*/
 }

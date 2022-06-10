@@ -16,6 +16,9 @@ import org.bukkit.inventory.meta.PotionMeta;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.potion.PotionType;
+import org.bukkit.scheduler.BukkitRunnable;
+
+import java.util.Random;
 
 public class PlayerUseWaterPotionListener implements Listener {
 
@@ -23,14 +26,17 @@ public class PlayerUseWaterPotionListener implements Listener {
     public PlayerUseWaterPotionListener(BushRehab main) {
         this.main = main;
     }
+    private final Material[] saplings = new Material[]{Material.POTTED_ACACIA_SAPLING,Material.POTTED_BIRCH_SAPLING,Material.POTTED_DARK_OAK_SAPLING,Material.POTTED_JUNGLE_SAPLING,Material.POTTED_SPRUCE_SAPLING,Material.POTTED_OAK_SAPLING};
 
     @EventHandler
     public void onPlayerDrinkWater(PlayerItemConsumeEvent e){
         Player p = e.getPlayer();
         PotionMeta meta = (PotionMeta) p.getInventory().getItemInMainHand().getItemMeta();
-        if (meta != null && meta.getBasePotionData().getType() == PotionType.WATER) {
+        Material targetBlock = p.getTargetBlock(null,5).getType();
+
+        if (targetBlock == Material.POTTED_DEAD_BUSH && meta.getBasePotionData().getType() == PotionType.WATER) {
              e.setCancelled(true);
-             p.sendMessage("no drinking");
+             p.sendMessage("no drinking while watering the bush");
         }
     }
 
@@ -38,32 +44,52 @@ public class PlayerUseWaterPotionListener implements Listener {
     public void onPlayerInteract(PlayerInteractEvent event) {
 
         if (event.getAction() == Action.RIGHT_CLICK_BLOCK) {
-
             Player player = event.getPlayer();
             Block clickedBlock = event.getClickedBlock();
-            player.sendMessage("right clicking");
-            if (clickedBlock != null && clickedBlock.getType() == Material.POTTED_DEAD_BUSH) {
+            PersistentDataContainer customBlockData = new CustomBlockData(clickedBlock, main);
+
+            if(customBlockData.get(main.keys.bushStateKey, PersistentDataType.INTEGER) == 2){
+                player.sendMessage("Give this bush some time to rehabilitate, please.");
+                return;
+            }
+
+            if (clickedBlock != null && clickedBlock.getType() == Material.POTTED_DEAD_BUSH && customBlockData.get(main.keys.bushStateKey, PersistentDataType.INTEGER) != 2) {
 
                 Location blocklocation = clickedBlock.getLocation();
-                player.sendMessage("a dead bush");
+
                 if (player.getInventory().getItemInMainHand().getType() == Material.POTION) {
-
-
                     PotionMeta potionMeta = (PotionMeta) player.getInventory().getItemInMainHand().getItemMeta();
-                    player.sendMessage("holding a bottle");
+
                     if (potionMeta.getBasePotionData().getType() == PotionType.WATER) {
 
-                        player.sendMessage("of water");
-                        event.setCancelled(true);
-                        PersistentDataContainer customBlockData = new CustomBlockData(clickedBlock, main);
                         player.sendMessage("clicking bush at " + blocklocation.getX() + " " + blocklocation.getY() + " " + blocklocation.getZ() + " with water");
-                        emptyWaterbottle(player);
-                        if (customBlockData.get(main.keys.bushStateKey, PersistentDataType.INTEGER) == null) {
+
+                        event.setCancelled(true);
+                        if (customBlockData.get(main.keys.bushStateKey, PersistentDataType.INTEGER) == 1) {
+                            customBlockData.set(main.keys.bushStateKey, PersistentDataType.INTEGER, 2);
+                            emptyWaterbottle(player);
+                            player.sendMessage("bush at " + blocklocation.getX() + " " + blocklocation.getY() + " " + blocklocation.getZ() + " set to " + customBlockData.get(main.keys.bushStateKey, PersistentDataType.INTEGER));
+                            new BukkitRunnable(){
+                                @Override
+                                public void run() {
+                                    Random r = new Random();
+                                    int index = r.nextInt(saplings.length);
+                                    Material item = saplings[index];
+                                    clickedBlock.setType(item);
+                                    player.sendMessage("The previously dead bush at "+ blocklocation.getX() + " " + blocklocation.getY() + " " + blocklocation.getZ() +" has grown into a sapling!");
+                                    customBlockData.remove(main.keys.bushStateKey);
+                                }
+                            }.runTaskLater(main,100);
+                        } else {
+                            player.sendMessage("bush at " + blocklocation.getX() + " " + blocklocation.getY() + " " + blocklocation.getZ() + " needs to be fertilized first!");
+                        }
+                       /* if (customBlockData.get(main.keys.bushStateKey, PersistentDataType.INTEGER) == 0) {
                             customBlockData.set(main.keys.bushStateKey, PersistentDataType.INTEGER, 1);
                             player.sendMessage("bush at " + blocklocation.getX() + " " + blocklocation.getY() + " " + blocklocation.getZ() + " set to " + customBlockData.get(main.keys.bushStateKey, PersistentDataType.INTEGER));
+
                         } else {
-                            player.sendMessage("bush at " + blocklocation.getX() + " " + blocklocation.getY() + " " + blocklocation.getZ() + " holds value of: " + customBlockData.get(main.keys.bushStateKey, PersistentDataType.INTEGER));
-                        }
+                            player.sendMessage("bush at " + blocklocation.getX() + " " + blocklocation.getY() + " " + blocklocation.getZ() + " has already been watered! It needs fertilizer);
+                        }*/
 
                     }
                 }
@@ -83,49 +109,4 @@ public class PlayerUseWaterPotionListener implements Listener {
             }
         }
    }
-
-        /*if (action == Action.RIGHT_CLICK_BLOCK) {
-            Material item = p.getInventory().getItemInMainHand().getType();
-
-            if(item == Material.POTION) {
-                PotionMeta meta = (PotionMeta) p.getInventory().getItemInMainHand().getItemMeta();
-                final Block clickedBlock = event.getClickedBlock();
-
-
-                if (meta != null && meta.getBasePotionData().getType() == PotionType.WATER && clickedBlock != null) {
-
-                    if (clickedBlock.getType() == Material.POTTED_DEAD_BUSH) {
-                        ItemStack itemStack = new ItemStack(Material.POTTED_DEAD_BUSH);
-                        final PersistentDataContainer customBlockData = new CustomBlockData(Material.POTTED_DEAD_BUSH,this);
-                        ItemMeta itemMeta = itemStack.getItemMeta();
-
-                        if(!itemMeta.getPersistentDataContainer().has(bushGrowthStageKey, PersistentDataType.INTEGER)){
-                            System.out.println("You should fertilize before watering");
-                        }
-                        else if (itemMeta.getPersistentDataContainer().get(bushGrowthStageKey,PersistentDataType.INTEGER) == 1 ){
-                            itemMeta.getPersistentDataContainer().set(bushGrowthStageKey, PersistentDataType.INTEGER, 2);
-                            itemStack.setItemMeta(itemMeta);
-                            System.out.println("Watering the dead bush!");
-                        }
-                        else if(itemMeta.getPersistentDataContainer().get(bushGrowthStageKey,PersistentDataType.INTEGER) > 1 ){
-                            System.out.println("The bush needs a full day to absorb nutrients");
-                        }
-                    }
-                    else{
-                        return;
-                    }
-
-                }
-                else{
-                    return;
-                }
-            }
-            else{
-                return;
-            }
-        }
-        else{
-            return;
-        }*/
-
 }

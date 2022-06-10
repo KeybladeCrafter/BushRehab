@@ -1,7 +1,7 @@
 package me.keyboi.bushrehab.listener;
 
+import com.jeff_media.customblockdata.CustomBlockData;
 import me.keyboi.bushrehab.BushRehab;
-import me.keyboi.bushrehab.CustomBlockData;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
@@ -57,14 +57,14 @@ public class PlayerUseWaterPotionListener implements Listener {
                         event.setCancelled(true);
                         PersistentDataContainer customBlockData = new CustomBlockData(clickedBlock, main);
                         player.sendMessage("clicking bush at " + blocklocation.getX() + " " + blocklocation.getY() + " " + blocklocation.getZ() + " with water");
-
-                        if (customBlockData.get(main.keys.bushStateKey, PersistentDataType.INTEGER) == 0) {
+                        emptyWaterbottle(player);
+                        if (customBlockData.get(main.keys.bushStateKey, PersistentDataType.INTEGER) == null) {
                             customBlockData.set(main.keys.bushStateKey, PersistentDataType.INTEGER, 1);
                             player.sendMessage("bush at " + blocklocation.getX() + " " + blocklocation.getY() + " " + blocklocation.getZ() + " set to " + customBlockData.get(main.keys.bushStateKey, PersistentDataType.INTEGER));
                         } else {
                             player.sendMessage("bush at " + blocklocation.getX() + " " + blocklocation.getY() + " " + blocklocation.getZ() + " holds value of: " + customBlockData.get(main.keys.bushStateKey, PersistentDataType.INTEGER));
                         }
-                        emptyWaterbottle(player);
+
                     }
                 }
             }

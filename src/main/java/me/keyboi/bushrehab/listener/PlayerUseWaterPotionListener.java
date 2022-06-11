@@ -39,6 +39,7 @@ public class PlayerUseWaterPotionListener implements Listener {
         Material targetBlock = p.getTargetBlock(null,5).getType();
 
         if (targetBlock == Material.POTTED_DEAD_BUSH && meta.getBasePotionData().getType() == PotionType.WATER) {
+            p.sendMessage("You cant drink water and a pour it");
              e.setCancelled(true);
         }
     }

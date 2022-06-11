@@ -51,7 +51,7 @@
                             <relocations>
                                 <relocation>
                                     <pattern>com.jeff_media.customblockdata.CustomBlockData</pattern>
-                                    <shadedPattern>YOUR.PACKAGE.CustomBlockData</shadedPattern>
+                                    <shadedPattern>me.keyboi.bushrehab.CustomBlockData</shadedPattern>
                                 </relocation>
                             </relocations>
                         </configuration>

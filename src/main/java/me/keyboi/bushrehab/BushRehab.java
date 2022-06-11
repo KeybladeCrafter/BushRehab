@@ -17,6 +17,7 @@ public final class BushRehab extends JavaPlugin implements Listener {
     public BushRehab() {
         keys = new Keys(this);
     }
+
     @Override
     public void onEnable() {
         Bukkit.getConsoleSender().sendMessage("_/\\_ BushRehab opening up shop _/\\_");

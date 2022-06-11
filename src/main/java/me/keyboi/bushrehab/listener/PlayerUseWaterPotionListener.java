@@ -6,6 +6,7 @@ import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
+import org.bukkit.block.data.BlockData;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -76,8 +77,9 @@ public class PlayerUseWaterPotionListener implements Listener {
                     if (potionMeta.getBasePotionData().getType() == PotionType.WATER) {
                         event.setCancelled(true);
                         if (customBlockData.get(main.keys.bushStateKey, PersistentDataType.INTEGER) == 1) {
-                            customBlockData.set(main.keys.bushStateKey, PersistentDataType.INTEGER, 2);
                             emptyWaterbottle(player);
+                            customBlockData.set(main.keys.bushStateKey, PersistentDataType.INTEGER, 2);
+
                             new BukkitRunnable(){
                                 @Override
                                 public void run() {

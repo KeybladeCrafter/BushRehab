@@ -39,7 +39,6 @@ public class PlayerUseWaterPotionListener implements Listener {
 
         if (targetBlock == Material.POTTED_DEAD_BUSH && meta.getBasePotionData().getType() == PotionType.WATER) {
              e.setCancelled(true);
-             p.sendMessage("no drinking while watering the bush");
         }
     }
 
@@ -59,7 +58,6 @@ public class PlayerUseWaterPotionListener implements Listener {
                 for(ItemStack droppedItem: drops) {
                     if(!droppedItem.equals(new ItemStack(Material.FLOWER_POT))) {
                         player.getWorld().dropItem(blockLocation, droppedItem);
-                        player.sendMessage("dropping a sapling");
                     }
                 }
             }

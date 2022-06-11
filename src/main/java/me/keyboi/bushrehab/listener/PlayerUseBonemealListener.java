@@ -24,12 +24,10 @@ public class PlayerUseBonemealListener implements Listener {
 
     @EventHandler
     public void onPlayerInteract(PlayerInteractEvent event) {
-
         if (event.getAction() == Action.RIGHT_CLICK_BLOCK) {
 
             Player player = event.getPlayer();
             Block clickedBlock = event.getClickedBlock();
-            Location blockLocation = clickedBlock.getLocation();
             PersistentDataContainer customBlockData = new CustomBlockData(clickedBlock, main);
             if(customBlockData.get(main.keys.bushStateKey, PersistentDataType.INTEGER) == null){return;}
             if(customBlockData.get(main.keys.bushStateKey, PersistentDataType.INTEGER) == 2){

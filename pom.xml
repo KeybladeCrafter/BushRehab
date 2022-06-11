@@ -50,8 +50,8 @@
                             <createDependencyReducedPom>false</createDependencyReducedPom>
                             <relocations>
                                 <relocation>
-                                    <pattern>com.jeff_media.customblockdata.CustomBlockData</pattern>
-                                    <shadedPattern>me.keyboi.bushrehab.CustomBlockData</shadedPattern>
+                                    <pattern>com.jeff_media.customblockdata</pattern>
+                                    <shadedPattern>me.keyboi.bushrehab.customblockdata</shadedPattern>
                                 </relocation>
                             </relocations>
                         </configuration>

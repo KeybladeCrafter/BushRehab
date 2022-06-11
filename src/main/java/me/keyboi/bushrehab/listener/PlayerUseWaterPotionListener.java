@@ -64,12 +64,6 @@ public class PlayerUseWaterPotionListener implements Listener {
                 }
             }
 
-            if(customBlockData.get(main.keys.bushStateKey, PersistentDataType.INTEGER) == null){return;}
-            if(customBlockData.get(main.keys.bushStateKey, PersistentDataType.INTEGER) == 2){
-                player.sendMessage("[BushRehab]" +ChatColor.GREEN +  "Give this bush some time to rehabilitate, please.");
-                event.setCancelled(true);
-                return;}
-
             if (clickedBlock.getType() == Material.POTTED_DEAD_BUSH && customBlockData.get(main.keys.bushStateKey, PersistentDataType.INTEGER) != 2) {
 
                 if (player.getInventory().getItemInMainHand().getType() == Material.POTION) {

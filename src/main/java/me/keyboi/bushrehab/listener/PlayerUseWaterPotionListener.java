@@ -19,6 +19,7 @@ import org.bukkit.potion.PotionType;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.World;
 
+import java.util.Collection;
 import java.util.Random;
 
 public class PlayerUseWaterPotionListener implements Listener {
@@ -51,25 +52,25 @@ public class PlayerUseWaterPotionListener implements Listener {
             Location blockLocation = clickedBlock.getLocation();
             PersistentDataContainer customBlockData = new CustomBlockData(clickedBlock, main);
 
-            new BukkitRunnable(){
-                @Override
-                public void run() {
-                    if(clickedBlock.getType().name().contains("POTTED") && clickedBlock.getType()!=Material.POTTED_DEAD_BUSH){
-                        event.setCancelled(true);
-                        ItemStack drops = (ItemStack) clickedBlock.getDrops();
-                        player.getWorld().dropItem(blockLocation,drops);
-                        clickedBlock.setType(Material.FLOWER_POT);
-                        player.sendMessage("dropping sapling");
+            if(clickedBlock.getType().name().contains("POTTED") && clickedBlock.getType()!=Material.POTTED_DEAD_BUSH){
+                event.setCancelled(true);
+                Collection<ItemStack> drops = clickedBlock.getDrops();
+                clickedBlock.setType(Material.FLOWER_POT);
+                for(ItemStack droppedItem: drops) {
+                    if(!droppedItem.equals(new ItemStack(Material.FLOWER_POT))) {
+                        player.getWorld().dropItem(blockLocation, droppedItem);
+                        player.sendMessage("dropping a sapling");
                     }
                 }
-            }.runTask(main);
+            }
 
             if(customBlockData.get(main.keys.bushStateKey, PersistentDataType.INTEGER) == null){return;}
             if(customBlockData.get(main.keys.bushStateKey, PersistentDataType.INTEGER) == 2){
-                player.sendMessage("[BushRehab]" + "Give this bush some time to rehabilitate, please.");
+                player.sendMessage("[BushRehab]" +ChatColor.GREEN +  "Give this bush some time to rehabilitate, please.");
+                event.setCancelled(true);
                 return;}
 
-            if (clickedBlock != null && clickedBlock.getType() == Material.POTTED_DEAD_BUSH && customBlockData.get(main.keys.bushStateKey, PersistentDataType.INTEGER) != 2) {
+            if (clickedBlock.getType() == Material.POTTED_DEAD_BUSH && customBlockData.get(main.keys.bushStateKey, PersistentDataType.INTEGER) != 2) {
 
                 if (player.getInventory().getItemInMainHand().getType() == Material.POTION) {
                     PotionMeta potionMeta = (PotionMeta) player.getInventory().getItemInMainHand().getItemMeta();
@@ -87,7 +88,7 @@ public class PlayerUseWaterPotionListener implements Listener {
                                     Material item = saplings[index];
                                     String name = saplingnames[index];
                                     clickedBlock.setType(item);
-                                    player.sendMessage("[BushRehab]" + ChatColor.GOLD + " The previously dead bush at "+ ChatColor.WHITE + blockLocation.getBlockX() + " " + blockLocation.getBlockY() + " " + blockLocation.getBlockZ() +" has grown into a " + ChatColor.WHITE + name +" sapling!");
+                                    player.sendMessage("[BushRehab]" + ChatColor.GOLD + " The previously dead bush at "+ ChatColor.WHITE + blockLocation.getBlockX() + " " + blockLocation.getBlockY() + " " + blockLocation.getBlockZ() +ChatColor.GREEN + " has grown into a " + ChatColor.WHITE + name +ChatColor.GREEN +" sapling!");
                                     customBlockData.remove(main.keys.bushStateKey);
                                 }
                             }.runTaskLater(main,100);
@@ -103,6 +104,7 @@ public class PlayerUseWaterPotionListener implements Listener {
         Material item = player.getInventory().getItemInMainHand().getType();
             if(item==Material.POTION) {
                 PotionMeta meta = (PotionMeta) player.getInventory().getItemInMainHand().getItemMeta();
+                assert meta != null;
                 PotionType potiontype = meta.getBasePotionData().getType();
                 Block clickedBlock = player.getTargetBlock(null, 4);
 

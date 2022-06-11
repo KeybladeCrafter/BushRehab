@@ -34,9 +34,10 @@ public class PlayerUseBonemealListener implements Listener {
             if(customBlockData.get(main.keys.bushStateKey, PersistentDataType.INTEGER) == null){return;}
             if(customBlockData.get(main.keys.bushStateKey, PersistentDataType.INTEGER) == 2){
                 player.sendMessage("[BushRehab]" + ChatColor.GREEN + " Give this bush some time to rehabilitate, please.");
+                event.setCancelled(true);
                 return;
             }
-            if (clickedBlock != null && clickedBlock.getType() == Material.POTTED_DEAD_BUSH && customBlockData.get(main.keys.bushStateKey, PersistentDataType.INTEGER) != 2) {
+            if (clickedBlock.getType() == Material.POTTED_DEAD_BUSH && customBlockData.get(main.keys.bushStateKey, PersistentDataType.INTEGER) != 2) {
                 
                 if (player.getInventory().getItemInMainHand().getType() == Material.BONE_MEAL) {
                     event.setCancelled(true);
@@ -63,7 +64,7 @@ public class PlayerUseBonemealListener implements Listener {
             } else {
                 player.getInventory().setItemInMainHand(new ItemStack(Material.AIR));
             }
-            player.sendMessage("[BushRehab]" + ChatColor.GREEN + "Fertilized the dead bush. It could use some water!");
+            player.sendMessage("[BushRehab]" + ChatColor.GREEN + " Fertilized the dead bush. It could use some water!");
         }
     }
 }

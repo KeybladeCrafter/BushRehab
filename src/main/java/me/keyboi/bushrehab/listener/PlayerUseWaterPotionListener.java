@@ -56,7 +56,7 @@ public class PlayerUseWaterPotionListener implements Listener {
                 Collection<ItemStack> drops = clickedBlock.getDrops();
                 clickedBlock.setType(Material.FLOWER_POT);
                 for(ItemStack droppedItem: drops) {
-                    if(!droppedItem.equals(new ItemStack(Material.FLOWER_POT))) {
+                    if(droppedItem.getType() == Material.FLOWER_POT){
                         player.getWorld().dropItem(blockLocation, droppedItem);
                     }
                 }

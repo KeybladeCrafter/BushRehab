@@ -2,6 +2,7 @@ package me.keyboi.bushrehab.listener;
 
 import com.jeff_media.customblockdata.CustomBlockData;
 import me.keyboi.bushrehab.BushRehab;
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -17,7 +18,6 @@ import org.bukkit.inventory.meta.PotionMeta;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.potion.PotionType;
-import org.bukkit.scheduler.BukkitRunnable;
 
 import java.util.Collection;
 import java.util.Random;
@@ -28,8 +28,8 @@ public class PlayerUseWaterPotionListener implements Listener {
     public PlayerUseWaterPotionListener(BushRehab main) {
         this.main = main;
     }
-    private final Material[] saplings = new Material[]{Material.POTTED_ACACIA_SAPLING,Material.POTTED_BIRCH_SAPLING,Material.POTTED_DARK_OAK_SAPLING,Material.POTTED_JUNGLE_SAPLING,Material.POTTED_SPRUCE_SAPLING,Material.POTTED_OAK_SAPLING};
-    private final String[] saplingnames = new String[]{"acacia","birch","dark oak","jungle","spruce","oak"};
+    public static final Material[] saplings = new Material[]{Material.POTTED_ACACIA_SAPLING,Material.POTTED_BIRCH_SAPLING,Material.POTTED_DARK_OAK_SAPLING,Material.POTTED_JUNGLE_SAPLING,Material.POTTED_SPRUCE_SAPLING,Material.POTTED_OAK_SAPLING};
+    public static final String[] saplingnames = new String[]{"acacia","birch","dark oak","jungle","spruce","oak"};
 
     @EventHandler
     public void onPlayerDrinkWater(PlayerItemConsumeEvent e){
@@ -70,26 +70,11 @@ public class PlayerUseWaterPotionListener implements Listener {
 
                     if (potionMeta.getBasePotionData().getType() == PotionType.WATER) {
                         event.setCancelled(true);
+
                         if (customBlockData.get(main.keys.bushStateKey, PersistentDataType.INTEGER) == 1) {
                             emptyWaterbottle(player);
                             customBlockData.set(main.keys.bushStateKey, PersistentDataType.INTEGER, 2);
-
-                            new BukkitRunnable(){
-                                @Override
-                                public void run() {
-                                    Random r = new Random();
-                                    if (!customBlockData.has(main.keys.bushStateKey, PersistentDataType.INTEGER)){
-                                        cancel();
-                                    }
-
-                                    int index = r.nextInt(saplings.length);
-                                    Material item = saplings[index];
-                                    String name = saplingnames[index];
-                                    clickedBlock.setType(item);
-                                    player.sendMessage("[BushRehab]" + ChatColor.GOLD + " The previously dead bush at "+ ChatColor.WHITE + blockLocation.getBlockX() + " " + blockLocation.getBlockY() + " " + blockLocation.getBlockZ() +ChatColor.GREEN + " has grown into a " + ChatColor.WHITE + name +ChatColor.GREEN +" sapling!");
-                                    customBlockData.remove(main.keys.bushStateKey);
-                                }
-                            }.runTaskLater(main,100);
+                            delayGrowthTask(player,clickedBlock);
                         } else {
                             player.sendMessage("[BushRehab]" + ChatColor.GREEN + " This bush needs nutrients. You should fertilize first!");
                         }
@@ -112,4 +97,20 @@ public class PlayerUseWaterPotionListener implements Listener {
             }
         }
    }
+    public static int taskId;
+    public void delayGrowthTask(Player player, Block clickedBlock) {
+
+        Location blockLocation = clickedBlock.getLocation();
+        PersistentDataContainer customBlockData = new CustomBlockData(clickedBlock, main);
+        taskId = Bukkit.getServer().getScheduler().runTaskLater(main, () -> {
+            Random r = new Random();
+            int index = r.nextInt(saplings.length);
+            Material item = saplings[index];
+            String name = saplingnames[index];
+            clickedBlock.setType(item);
+            player.sendMessage("[BushRehab]" + ChatColor.GOLD + " The previously dead bush at " + ChatColor.WHITE + blockLocation.getBlockX() + " " + blockLocation.getBlockY() + " " + blockLocation.getBlockZ() + ChatColor.GREEN + " has grown into a " + ChatColor.WHITE + name + ChatColor.GREEN + " sapling!");
+            customBlockData.remove(main.keys.bushStateKey);
+
+        },100L).getTaskId();
+    }
 }

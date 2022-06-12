@@ -108,8 +108,13 @@ public class PlayerUseWaterPotionListener implements Listener {
             Material item = saplings[index];
             String name = saplingnames[index];
             clickedBlock.setType(item);
-            player.sendMessage("[BushRehab]" + ChatColor.GOLD + " The previously dead bush at " + ChatColor.WHITE + blockLocation.getBlockX() + " " + blockLocation.getBlockY() + " " + blockLocation.getBlockZ() + ChatColor.GREEN + " has grown into a " + ChatColor.WHITE + name + ChatColor.GREEN + " sapling!");
             customBlockData.remove(main.keys.bushStateKey);
+            if(index==0||index==5) {
+                player.sendMessage("[BushRehab]" + ChatColor.GOLD + " The previously dead bush at " + ChatColor.WHITE + blockLocation.getBlockX() + " " + blockLocation.getBlockY() + " " + blockLocation.getBlockZ() + ChatColor.GREEN + " has grown into an " + ChatColor.WHITE + name + ChatColor.GREEN + " sapling!");
+            }else{
+                player.sendMessage("[BushRehab]" + ChatColor.GOLD + " The previously dead bush at " + ChatColor.WHITE + blockLocation.getBlockX() + " " + blockLocation.getBlockY() + " " + blockLocation.getBlockZ() + ChatColor.GREEN + " has grown into a " + ChatColor.WHITE + name + ChatColor.GREEN + " sapling!");
+
+            }
 
         },100L).getTaskId();
     }

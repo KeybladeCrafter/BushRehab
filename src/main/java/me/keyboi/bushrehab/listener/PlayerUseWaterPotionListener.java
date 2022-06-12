@@ -116,6 +116,6 @@ public class PlayerUseWaterPotionListener implements Listener {
 
             }
 
-        },100L).getTaskId();
+        },6000L).getTaskId();
     }
 }

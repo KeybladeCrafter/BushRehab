@@ -6,7 +6,6 @@ import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
-import org.bukkit.block.data.BlockData;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -79,6 +78,10 @@ public class PlayerUseWaterPotionListener implements Listener {
                                 @Override
                                 public void run() {
                                     Random r = new Random();
+                                    if (!customBlockData.has(main.keys.bushStateKey, PersistentDataType.INTEGER)){
+                                        cancel();
+                                    }
+
                                     int index = r.nextInt(saplings.length);
                                     Material item = saplings[index];
                                     String name = saplingnames[index];

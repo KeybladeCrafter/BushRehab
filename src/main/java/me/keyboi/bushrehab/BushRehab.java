@@ -1,6 +1,7 @@
 package me.keyboi.bushrehab;
 
 import com.jeff_media.customblockdata.CustomBlockData;
+import me.keyboi.bushrehab.listener.BlockBrokenListener;
 import me.keyboi.bushrehab.listener.PlayerUseBonemealListener;
 import me.keyboi.bushrehab.listener.PlayerUseWaterPotionListener;
 import me.keyboi.bushrehab.tasks.ChangeBushData;
@@ -38,5 +39,6 @@ public final class BushRehab extends JavaPlugin implements Listener {
         PluginManager pm = getServer().getPluginManager();
         pm.registerEvents(new PlayerUseBonemealListener(this), this);
         pm.registerEvents(new PlayerUseWaterPotionListener(this), this);
+        pm.registerEvents(new BlockBrokenListener(this), this);
     }
 }

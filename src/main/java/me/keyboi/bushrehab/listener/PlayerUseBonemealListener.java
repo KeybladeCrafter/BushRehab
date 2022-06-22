@@ -24,26 +24,22 @@ public class PlayerUseBonemealListener implements Listener {
     @EventHandler
     public void onPlayerInteract(PlayerInteractEvent event) {
         if (event.getAction() == Action.RIGHT_CLICK_BLOCK) {
-
             Player player = event.getPlayer();
             Block clickedBlock = event.getClickedBlock();
             PersistentDataContainer customBlockData = new CustomBlockData(clickedBlock, main);
-            if(customBlockData.get(main.keys.bushStateKey, PersistentDataType.INTEGER) == null){return;}
-            if(customBlockData.get(main.keys.bushStateKey, PersistentDataType.INTEGER) == 2){
-                player.sendMessage("[BushRehab]" + ChatColor.GREEN + " Give this bush some time to rehabilitate, please.");
-                event.setCancelled(true);
-                return;
-            }
-            if (clickedBlock.getType() == Material.POTTED_DEAD_BUSH && customBlockData.get(main.keys.bushStateKey, PersistentDataType.INTEGER) != 2) {
-                
-                if (player.getInventory().getItemInMainHand().getType() == Material.BONE_MEAL) {
-                    event.setCancelled(true);
+            ItemStack item = event.getPlayer().getInventory().getItemInMainHand();
 
-                    if (customBlockData.get(main.keys.bushStateKey, PersistentDataType.INTEGER) == 0) {
-                        customBlockData.set(main.keys.bushStateKey, PersistentDataType.INTEGER, 1);
+            if (clickedBlock.getType() == Material.POTTED_DEAD_BUSH){
+                if(item.getType() == Material.BONE_MEAL) {
+                    event.setCancelled(true);
+                    if (customBlockData.get(main.keys.bushStateKey, PersistentDataType.INTEGER) == null) {
+                        customBlockData.set(main.keys.bushStateKey, PersistentDataType.INTEGER, 0);
                         removeBonemeal(player);
                     }
-                    else {
+                    else if(customBlockData.get(main.keys.bushStateKey, PersistentDataType.INTEGER) == 1){
+                        player.sendMessage("[BushRehab]" + ChatColor.GREEN + " Give this bush some time to rehabilitate, please.");
+                        event.setCancelled(true);
+                    } else {
                         player.sendMessage("[BushRehab]" + ChatColor.GREEN + " This bush has already been fertilized. Try giving it some water!");
                     }
                 }
@@ -54,7 +50,6 @@ public class PlayerUseBonemealListener implements Listener {
         Material item = player.getInventory().getItemInMainHand().getType();
         Block clickedBlock = player.getTargetBlock(null, 4);
         int itemAmount = player.getInventory().getItemInMainHand().getAmount();
-
         if (item==Material.BONE_MEAL && clickedBlock.getType() == Material.POTTED_DEAD_BUSH) {
             if (itemAmount > 1) {
                 player.getInventory().getItemInMainHand().setAmount(itemAmount - 1);

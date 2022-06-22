@@ -34,7 +34,7 @@ public final class BushRehab extends JavaPlugin implements Listener {
         CustomBlockData.registerListener(this);
 
         saveDefaultConfig();
-        getConfig().addDefault("Growth Time", 30);
+        getConfig().addDefault("Growth Time", 300);
         getConfig().options().copyDefaults(true);
         saveConfig();
 

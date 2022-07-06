@@ -8,6 +8,7 @@ import me.keyboi.bushrehab.listener.PlayerUseWaterPotionListener;
 import me.keyboi.bushrehab.tasks.BushCountdownTask;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
+import org.bukkit.Sound;
 import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.event.Listener;
@@ -17,6 +18,8 @@ import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.util.Random;
+import java.util.UUID;
+
 import static me.keyboi.bushrehab.listener.PlayerUseWaterPotionListener.saplings;
 
 public final class BushRehab extends JavaPlugin implements Listener {
@@ -58,6 +61,7 @@ public final class BushRehab extends JavaPlugin implements Listener {
         if(TaskHandler.get().getConfigurationSection("tasks")==null){return;}
 
         for (String task : TaskHandler.get().getConfigurationSection("tasks").getKeys(false)) {
+            UUID playerUuid = UUID.fromString(TaskHandler.get().getString("tasks."+task+".player"));
             int timeLeft = TaskHandler.get().getInt("tasks."+task+".timeleft");
             String worldname = TaskHandler.get().getString("tasks."+task+".world");
             World world = Bukkit.getServer().getWorld(worldname);
@@ -76,6 +80,9 @@ public final class BushRehab extends JavaPlugin implements Listener {
                     Material item = saplings[index];
                     block.setType(item);
                     customBlockData.remove(JavaPlugin.getPlugin(BushRehab.class).keys.bushStateKey);
+                    if(Bukkit.getPlayer(playerUuid).isOnline()){
+                        Bukkit.getPlayer(playerUuid).playSound(block.getLocation(), Sound.BLOCK_AMETHYST_BLOCK_STEP,1f,1f);
+                    }
                     }, timeLeft).getTaskId();
                 TaskHandler.get().set("tasks."+task,null);
                 TaskHandler.get().set("tasks."+newTaskId+".world",worldname);

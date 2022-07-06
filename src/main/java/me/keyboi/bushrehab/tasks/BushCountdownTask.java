@@ -3,6 +3,7 @@ package me.keyboi.bushrehab.tasks;
 import me.keyboi.bushrehab.BushRehab;
 import me.keyboi.bushrehab.TaskHandler;
 import me.keyboi.bushrehab.listener.PlayerUseWaterPotionListener;
+import org.bukkit.Bukkit;
 import org.bukkit.scheduler.BukkitRunnable;
 
 import java.util.ArrayList;
@@ -38,6 +39,7 @@ public class BushCountdownTask extends BukkitRunnable {
                 value = value - 20;
                 PlayerUseWaterPotionListener.getTaskMap().put(key,value);
                 TaskHandler.get().set("tasks."+ key +".timeleft", value);
+
                 TaskHandler.save();
             }else if(key ==null){
                 TaskHandler.get().set("tasks."+key, null);
@@ -51,6 +53,7 @@ public class BushCountdownTask extends BukkitRunnable {
         }
         for(Integer taskKey:toRemoveList){
             PlayerUseWaterPotionListener.getTaskMap().remove(taskKey);
+            Bukkit.getScheduler().cancelTask(taskKey);
         }
     }
 }

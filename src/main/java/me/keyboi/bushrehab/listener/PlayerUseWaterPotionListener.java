@@ -4,10 +4,7 @@ import com.jeff_media.customblockdata.CustomBlockData;
 import me.keyboi.bushrehab.BushRehab;
 import me.keyboi.bushrehab.TaskHandler;
 import me.keyboi.bushrehab.tasks.BushCountdownTask;
-import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
-import org.bukkit.Location;
-import org.bukkit.Material;
+import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -26,11 +23,12 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
 
+import static org.bukkit.GameMode.CREATIVE;
+
 public class PlayerUseWaterPotionListener implements Listener {
 
     BushRehab main;
     public PlayerUseWaterPotionListener(BushRehab main) {this.main = main;}
-    private Location bushLoc;
     public int taskId;
     public int delayTimeSec = BushRehab.getPlugin(BushRehab.class).getConfig().getInt("Growth Time");
     public int delayTimeTick=delayTimeSec*20;
@@ -46,7 +44,6 @@ public class PlayerUseWaterPotionListener implements Listener {
             Player taskPlayer = event.getPlayer();
             Block clickedBlock = event.getClickedBlock();
             Location blockLocation = clickedBlock.getLocation();
-            bushLoc = blockLocation;
             PersistentDataContainer customBlockData = new CustomBlockData(clickedBlock, main);
 
             if(clickedBlock.getType().name().contains("POTTED") && clickedBlock.getType()!=Material.POTTED_DEAD_BUSH){
@@ -64,6 +61,7 @@ public class PlayerUseWaterPotionListener implements Listener {
                 if (item.getType() == null) {
                     if (customBlockData.has(main.keys.bushStateKey, PersistentDataType.INTEGER)) {
                         customBlockData.remove(main.keys.bushStateKey);
+                        BlockBrokenListener.onBlockDataChange(blockLocation);
                         event.getPlayer().sendMessage("[BushRehab]" + ChatColor.GREEN + "You removed the bush too soon!");
                     }
                 }else if (item.getType() == Material.POTION) {
@@ -72,6 +70,7 @@ public class PlayerUseWaterPotionListener implements Listener {
                     if (potiontype != PotionType.WATER) {
                         if (customBlockData.has(main.keys.bushStateKey, PersistentDataType.INTEGER)) {
                             customBlockData.remove(main.keys.bushStateKey);
+                            BlockBrokenListener.onBlockDataChange(blockLocation);
                             event.getPlayer().sendMessage("[BushRehab]" + ChatColor.GREEN + "You removed the bush too soon!");
                         }
                     } else{
@@ -85,13 +84,14 @@ public class PlayerUseWaterPotionListener implements Listener {
                             event.setCancelled(true);
                             emptyWaterbottle(taskPlayer);
                             customBlockData.set(main.keys.bushStateKey, PersistentDataType.INTEGER, 1);
-                            delayGrowthTask(clickedBlock,delayTimeTick);
-                            bushSave();
+                            delayGrowthTask(clickedBlock, taskPlayer);
+                            bushSave(blockLocation,taskPlayer);
                         }
                     }
                 } else if (item.getType() != Material.BONE_MEAL) {
                     if (customBlockData.has(main.keys.bushStateKey, PersistentDataType.INTEGER)) {
                         customBlockData.remove(main.keys.bushStateKey);
+                        BlockBrokenListener.onBlockDataChange(blockLocation);
                         event.getPlayer().sendMessage("[BushRehab]" + ChatColor.GREEN + "You removed the bush too soon!");
                     }
                 }
@@ -107,32 +107,43 @@ public class PlayerUseWaterPotionListener implements Listener {
         assert meta != null;
         PotionType potiontype = meta.getBasePotionData().getType();
         Block clickedBlock = player.getTargetBlock(null, 4);
-        if (potiontype == PotionType.WATER && clickedBlock.getType() == Material.POTTED_DEAD_BUSH) {
-            player.getInventory().setItemInMainHand(new ItemStack(Material.GLASS_BOTTLE));
-            player.sendMessage("[BushRehab]" + ChatColor.GREEN + " Watering the fertilized bush");
+       player.playSound(clickedBlock.getLocation(), Sound.ITEM_BOTTLE_EMPTY,1f,1f);
+        if(player.getGameMode()!=CREATIVE) {
+            if (potiontype == PotionType.WATER && clickedBlock.getType() == Material.POTTED_DEAD_BUSH) {
+                player.getInventory().setItemInMainHand(new ItemStack(Material.GLASS_BOTTLE));
+                player.sendMessage("[BushRehab]" + ChatColor.GREEN + " Watering the fertilized bush");
+            }
+        }else{
+            if(potiontype == PotionType.WATER && clickedBlock.getType() == Material.POTTED_DEAD_BUSH){
+                player.sendMessage("[BushRehab]" + ChatColor.GREEN + " Watering the fertilized bush");
+            }
         }
    }
 
-    public void delayGrowthTask( Block clickedBlock, Integer delayTimeTick) {
+    public void delayGrowthTask( Block clickedBlock, Player player) {
         PersistentDataContainer customBlockData = new CustomBlockData(clickedBlock, JavaPlugin.getPlugin(BushRehab.class));
         taskId = Bukkit.getServer().getScheduler().runTaskLater(JavaPlugin.getPlugin(BushRehab.class), new Runnable() {
             @Override
             public void run() {
-                Random r = new Random();
-                int index = r.nextInt(saplings.length);
-                Material item = saplings[index];
-                clickedBlock.setType(item);
+                    Random r = new Random();
+                    int index = r.nextInt(saplings.length);
+                    Material item = saplings[index];
+                    clickedBlock.setType(item);
+                player.playSound(clickedBlock.getLocation(),Sound.BLOCK_AMETHYST_BLOCK_STEP,1f,1f);
+
                 customBlockData.remove(JavaPlugin.getPlugin(BushRehab.class).keys.bushStateKey);
             }
         },delayTimeTick).getTaskId();
     }
-    private void bushSave(){
+    private void bushSave(Location bushLoc,Player player){
         getTaskMap().put(taskId,delayTimeTick);
-        TaskHandler.get().set("tasks."+ BushCountdownTask.getKey(getTaskMap(),delayTimeTick)+".world",bushLoc.getWorld().getName());
-        TaskHandler.get().set("tasks."+ BushCountdownTask.getKey(getTaskMap(),delayTimeTick)+".LocX",bushLoc.getX());
-        TaskHandler.get().set("tasks."+ BushCountdownTask.getKey(getTaskMap(),delayTimeTick)+".LocY",bushLoc.getY());
-        TaskHandler.get().set("tasks."+ BushCountdownTask.getKey(getTaskMap(),delayTimeTick) +".LocZ",bushLoc.getZ());
-        TaskHandler.get().set("tasks."+ BushCountdownTask.getKey(getTaskMap(),delayTimeTick) +".timeleft", delayTimeTick);
+        TaskHandler.get().set("tasks."+ taskId +".player",player.getUniqueId().toString());
+        TaskHandler.get().set("tasks."+ taskId +".world",bushLoc.getWorld().getName());
+        TaskHandler.get().set("tasks."+ taskId+".LocX",bushLoc.getX());
+        TaskHandler.get().set("tasks."+ taskId+".LocY",bushLoc.getY());
+        TaskHandler.get().set("tasks."+ taskId +".LocZ",bushLoc.getZ());
+        TaskHandler.get().set("tasks."+ taskId +".timeleft", delayTimeTick);
         TaskHandler.save();
+        //BushCountdownTask.getKey(getTaskMap(),delayTimeTick)
     }
 }

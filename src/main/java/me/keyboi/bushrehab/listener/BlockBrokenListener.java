@@ -18,22 +18,31 @@ public class BlockBrokenListener implements Listener {
     @EventHandler
     public void onBlockBreakEarly(CustomBlockDataRemoveEvent event) {
         Location blockLocation = event.getBlock().getLocation();
-        if(TaskHandler.get().getConfigurationSection("tasks")==null){return;}
-        for(String task: TaskHandler.get().getConfigurationSection("tasks").getKeys(false)) {
-            if(blockLocation.getBlockX()!=TaskHandler.get().getInt("tasks."+task+".LocX")){
-                continue;}
-            if(blockLocation.getBlockY()!=TaskHandler.get().getInt("tasks."+task+".LocY")){
-                continue;}
-            if(blockLocation.getBlockZ()!=TaskHandler.get().getInt("tasks."+task+".LocZ")){
-                continue;}
+        onBlockDataChange(blockLocation);
+    }
+    public static void onBlockDataChange(Location blockLocation) {
+        if (TaskHandler.get().getConfigurationSection("tasks") == null) {
+            return;
+        }
+        for (String task : TaskHandler.get().getConfigurationSection("tasks").getKeys(false)) {
+            if (blockLocation.getBlockX() != TaskHandler.get().getInt("tasks." + task + ".LocX")) {
+                continue;
+            }
+            if (blockLocation.getBlockY() != TaskHandler.get().getInt("tasks." + task + ".LocY")) {
+                continue;
+            }
+            if (blockLocation.getBlockZ() != TaskHandler.get().getInt("tasks." + task + ".LocZ")) {
+                continue;
+            }
             int taskInt = Integer.parseInt(task);
             Bukkit.getScheduler().cancelTask(taskInt);
             PlayerUseWaterPotionListener.getTaskMap().remove(taskInt);
-            if(!PlayerUseWaterPotionListener.getTaskMap().containsKey(taskInt)){
-            }
-            if(TaskHandler.get().getConfigurationSection("tasks").contains(task)) {
-                TaskHandler.get().set("tasks." + task, null);
-                TaskHandler.save();
+            if (!PlayerUseWaterPotionListener.getTaskMap().containsKey(taskInt)) {
+                if (TaskHandler.get().getConfigurationSection("tasks").contains(task)) {
+                    TaskHandler.get().set("tasks." + task, null);
+                    TaskHandler.save();
+                }
+
             }
         }
     }

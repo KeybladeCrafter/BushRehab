@@ -4,6 +4,7 @@ import com.jeff_media.customblockdata.CustomBlockData;
 import me.keyboi.bushrehab.BushRehab;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
+import org.bukkit.Sound;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -13,6 +14,8 @@ import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
+
+import static org.bukkit.GameMode.CREATIVE;
 
 public class PlayerUseBonemealListener implements Listener {
 
@@ -33,8 +36,9 @@ public class PlayerUseBonemealListener implements Listener {
                 if(item.getType() == Material.BONE_MEAL) {
                     event.setCancelled(true);
                     if (customBlockData.get(main.keys.bushStateKey, PersistentDataType.INTEGER) == null) {
-                        customBlockData.set(main.keys.bushStateKey, PersistentDataType.INTEGER, 0);
                         removeBonemeal(player);
+                        customBlockData.set(main.keys.bushStateKey, PersistentDataType.INTEGER, 0);
+
                     }
                     else if(customBlockData.get(main.keys.bushStateKey, PersistentDataType.INTEGER) == 1){
                         player.sendMessage("[BushRehab]" + ChatColor.GREEN + " Give this bush some time to rehabilitate, please.");
@@ -47,16 +51,24 @@ public class PlayerUseBonemealListener implements Listener {
         }
     }
     public void removeBonemeal(Player player){
+
         Material item = player.getInventory().getItemInMainHand().getType();
         Block clickedBlock = player.getTargetBlock(null, 4);
+        player.playSound(clickedBlock.getLocation(), Sound.ITEM_BONE_MEAL_USE,1f,1f);
         int itemAmount = player.getInventory().getItemInMainHand().getAmount();
-        if (item==Material.BONE_MEAL && clickedBlock.getType() == Material.POTTED_DEAD_BUSH) {
-            if (itemAmount > 1) {
-                player.getInventory().getItemInMainHand().setAmount(itemAmount - 1);
-            } else {
-                player.getInventory().setItemInMainHand(new ItemStack(Material.AIR));
+        if(player.getGameMode()!=CREATIVE) {
+            if (item == Material.BONE_MEAL && clickedBlock.getType() == Material.POTTED_DEAD_BUSH) {
+                if (itemAmount > 1) {
+                    player.getInventory().getItemInMainHand().setAmount(itemAmount - 1);
+                } else {
+                    player.getInventory().setItemInMainHand(new ItemStack(Material.AIR));
+                }
+                player.sendMessage("[BushRehab]" + ChatColor.GREEN + " Fertilized the dead bush. It could use some water!");
             }
-            player.sendMessage("[BushRehab]" + ChatColor.GREEN + " Fertilized the dead bush. It could use some water!");
+        }else{
+            if(item == Material.BONE_MEAL && clickedBlock.getType() == Material.POTTED_DEAD_BUSH) {
+                player.sendMessage("[BushRehab]" + ChatColor.GREEN + " Fertilized the dead bush. It could use some water!");
+            }
         }
     }
 }

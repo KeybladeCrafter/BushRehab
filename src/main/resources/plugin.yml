@@ -1,6 +1,6 @@
 name: BushRehab
 version: '${project.version}'
 main: me.keyboi.bushrehab.BushRehab
-api-version: 1.18
+api-version: 1.19
 authors: [ Keyboi ]
 description: Rehabilitate dead bushes into a random sapling!
